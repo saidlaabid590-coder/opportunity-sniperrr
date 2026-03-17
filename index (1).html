@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قناص الفرص — Opportunity Sniper</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1018;--bg2:#161822;--bg3:#1e2030;--bg4:#252840;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --cyan:#22d3ee;--cyan2:rgba(34,211,238,0.12);--cyan3:rgba(34,211,238,0.2);
+  --text1:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+  --green:#4ade80;--green2:rgba(74,222,128,0.12);
+  --amber:#fbbf24;--amber2:rgba(251,191,36,0.12);
+  --red:#f87171;--red2:rgba(248,113,113,0.12);
+  --purple:#a78bfa;--purple2:rgba(167,139,250,0.12);
+  --blue:#60a5fa;--blue2:rgba(96,165,250,0.12);
+  --sidebar:220px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text1);min-height:100vh;overflow-x:hidden}
+.app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:rgba(15,16,24,0.98);border-left:1px solid var(--border);position:fixed;top:0;right:0;height:100vh;display:flex;flex-direction:column;z-index:100;transition:width .25s}
+.sidebar.collapsed{width:64px}
+.sidebar-logo{padding:14px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;overflow:hidden;white-space:nowrap}
+.logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#22d3ee,#3b82f6);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2.2}
+.logo-text{overflow:hidden}
+.logo-title{font-size:14px;font-weight:600;color:var(--text1)}
+.logo-sub{font-size:10px;color:var(--cyan);font-family:monospace;margin-top:1px}
+nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .15s;font-size:13px;color:var(--text2);white-space:nowrap;overflow:hidden;user-select:none}
+.nav-item:hover{background:var(--bg3);color:var(--text1)}
+.nav-item.active{background:var(--cyan2);color:var(--cyan);border-color:var(--cyan3)}
+.nav-item svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
+.nav-label{flex:1;overflow:hidden;text-overflow:ellipsis}
+.nav-badge{background:var(--cyan2);color:var(--cyan);font-size:11px;padding:1px 7px;border-radius:20px;font-family:monospace;flex-shrink:0}
+.sidebar-bottom{padding:10px 8px;border-top:1px solid var(--border)}
+.api-pill{padding:7px 10px;border-radius:8px;font-size:11px;overflow:hidden;white-space:nowrap;margin-bottom:8px}
+.api-pill.ok{background:var(--green2);color:var(--green);border:1px solid rgba(74,222,128,0.2)}
+.api-pill.bad{background:var(--red2);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.sov-box{padding:10px;border-radius:10px;background:rgba(34,211,238,0.04);border:1px solid rgba(34,211,238,0.1);overflow:hidden;margin-bottom:8px}
+.sov-title{font-size:11px;color:var(--cyan);font-weight:600;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.sov-title svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2;flex-shrink:0}
+.sov-sub{font-size:10px;color:var(--text3);margin-top:4px;line-height:1.4}
+.sov-ready{font-size:10px;color:var(--green);margin-top:5px}
+.collapse-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px;border-radius:8px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;transition:all .15s}
+.collapse-btn:hover{color:var(--text1);background:var(--bg3)}
+
+/* MAIN */
+.main{margin-right:var(--sidebar);flex:1;min-height:100vh;transition:margin-right .25s}
+.main.collapsed{margin-right:64px}
+.page{display:none;padding:22px;max-width:1100px;margin:0 auto}
+.page.active{display:block}
+.page-header{margin-bottom:20px}
+.page-title{font-size:20px;font-weight:600;color:var(--text1)}
+.page-sub{font-size:13px;color:var(--text2);margin-top:4px}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:600;color:var(--text1)}
+.card-link{font-size:12px;color:var(--blue);cursor:pointer;background:none;border:none}
+.card-link:hover{color:#93c5fd}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.stat-icon{font-size:18px}
+.stat-val{font-size:22px;font-weight:600;color:var(--text1);margin-top:7px}
+.stat-label{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* QUICK ACTIONS */
+.actions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.action-btn{padding:14px 16px;border-radius:12px;cursor:pointer;border:none;text-align:right;transition:filter .15s}
+.action-btn:hover{filter:brightness(1.1)}
+.action-btn.blue{background:linear-gradient(135deg,#1e40af,#2563eb)}
+.action-btn.green{background:linear-gradient(135deg,#166534,#16a34a)}
+.action-btn.purple{background:linear-gradient(135deg,#5b21b6,#7c3aed)}
+.btn-icon{font-size:18px;margin-bottom:7px}
+.btn-title{font-size:13px;font-weight:600;color:#fff}
+.btn-sub{font-size:11px;color:rgba(255,255,255,.65);margin-top:3px}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* LEADS */
+.lead-item{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s}
+.lead-item:last-child{border-bottom:none}
+.lead-item:hover{background:var(--bg3)}
+.score-badge{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.score-high{background:rgba(74,222,128,.15);color:var(--green);border:1px solid rgba(74,222,128,.25)}
+.score-mid{background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.25)}
+.score-low{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.lead-title{font-size:12px;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:ltr}
+.lead-meta{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap}
+.sub-tag{font-size:10px;padding:2px 8px;border-radius:20px}
+.status-pending{background:var(--amber2);color:var(--amber)}
+.status-replied{background:var(--green2);color:var(--green)}
+.status-ignored{background:rgba(100,116,139,.15);color:var(--text3)}
+.status-starred{background:rgba(251,191,36,.15);color:var(--amber)}
+
+/* BAR */
+.bar-row{margin-bottom:10px}
+.bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px}
+.bar-track{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s}
+
+/* INPUTS */
+input,select,textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text1);padding:9px 13px;font-size:13px;outline:none;font-family:inherit;width:100%;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(34,211,238,.1)}
+input::placeholder,textarea::placeholder{color:var(--text3)}
+textarea{resize:vertical;line-height:1.6}
+select option{background:#1e2030}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff}
+.btn-primary:hover{background:linear-gradient(135deg,#1e40af,#1d4ed8)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-danger{background:linear-gradient(135deg,#991b1b,#dc2626);color:#fff}
+.btn-danger:hover{background:linear-gradient(135deg,#7f1d1d,#b91c1c)}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg4);color:var(--text1)}
+.btn-ai{background:var(--purple2);color:var(--purple);border:1px solid rgba(167,139,250,.2)}
+.btn-ai:hover{background:rgba(167,139,250,.2)}
+.btn-cyan{background:var(--cyan2);color:var(--cyan);border:1px solid rgba(34,211,238,.2)}
+.btn-cyan:hover{background:rgba(34,211,238,.2)}
+.btn-full{width:100%}
+
+/* SCANNER */
+.mode-tabs{display:flex;gap:2px;padding:3px;border-radius:10px;background:var(--bg3);width:fit-content;margin-bottom:16px}
+.mode-tab{padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);border:none;background:none;transition:all .15s;font-family:inherit}
+.mode-tab.active{background:#2563eb;color:#fff}
+.mode-tab:hover:not(.active){color:var(--text1);background:var(--bg4)}
+.sub-chip{padding:5px 11px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--border);color:var(--text3);background:var(--bg2);transition:all .15s;user-select:none}
+.sub-chip:hover{border-color:var(--border2);color:var(--text2)}
+.sub-chip.on{background:var(--cyan2);color:var(--cyan);border-color:var(--cyan3)}
+.subs-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.cat-label{font-size:12px;font-weight:500;margin-bottom:6px;margin-top:10px}
+.log-box{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:monospace;font-size:11px;line-height:1.8;color:var(--text3);height:180px;overflow-y:auto;direction:ltr}
+.log-line.ok{color:var(--green)}
+.log-line.err{color:var(--red)}
+.log-line.warn{color:var(--amber)}
+.log-line.scan{color:var(--cyan)}
+.result-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;transition:border-color .15s}
+.result-card:hover{border-color:var(--border2)}
+.result-actions{display:flex;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap}
+
+/* AI LAB */
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.routing-log{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:12px;font-family:monospace;font-size:11px;color:var(--text3);line-height:1.9;min-height:100px;direction:ltr}
+.ai-result-box{background:var(--bg2);border:1px solid rgba(34,211,238,.2);border-radius:10px;padding:14px;margin-bottom:10px}
+.ai-result-label{font-size:11px;color:var(--cyan);font-weight:600;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.ai-result-text{font-size:13px;color:var(--text1);line-height:1.7;direction:ltr}
+.score-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:10px}
+.score-circle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;flex-shrink:0}
+.model-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;font-size:11px;background:var(--green2);color:var(--green);border:1px solid rgba(74,222,128,.2);margin-bottom:12px}
+
+/* LEADS PAGE */
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.filter-tab{padding:5px 13px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:var(--bg2);transition:all .15s;user-select:none}
+.filter-tab.active{background:var(--cyan2);color:var(--cyan);border-color:var(--cyan3)}
+.search-input-wrap{position:relative;margin-bottom:12px}
+.search-input-wrap svg{position:absolute;left:auto;right:12px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--text3);fill:none;stroke-width:2;pointer-events:none}
+.search-input-wrap input{padding-right:36px}
+.leads-full{border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.lead-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.lead-row:last-child{border-bottom:none}
+.lead-row:hover{background:var(--bg3)}
+.lead-row-actions{display:flex;gap:6px;flex-shrink:0}
+.empty-state{padding:50px;text-align:center;color:var(--text3)}
+.empty-state .es-icon{font-size:36px;margin-bottom:10px}
+.empty-state .es-text{font-size:14px}
+
+/* SETTINGS */
+.settings-section{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.section-title{font-size:14px;font-weight:600;color:var(--text1);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.field-label{font-size:12px;color:var(--text2);margin-bottom:7px;display:block}
+.field-hint{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.5}
+.lang-btns,.theme-btns{display:flex;gap:6px;flex-wrap:wrap}
+.lang-btn,.theme-btn{padding:8px 14px;border-radius:8px;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:var(--bg3);font-size:13px;transition:all .15s;font-family:inherit}
+.lang-btn.on,.theme-btn.on{background:rgba(37,99,235,.15);color:var(--blue);border-color:rgba(37,99,235,.4)}
+.input-row{display:flex;gap:8px;align-items:flex-start}
+.input-row input{flex:1}
+.privacy-list{list-style:none;space-y:6px}
+.privacy-list li{display:flex;align-items:flex-start;gap:7px;font-size:13px;color:var(--text2);padding:4px 0}
+.privacy-list li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0}
+.range-row{display:flex;align-items:center;gap:12px}
+.range-row input[type=range]{flex:1;accent-color:var(--cyan)}
+.range-val{font-size:16px;font-weight:600;color:var(--cyan);min-width:40px;text-align:center}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.toggle{position:relative;display:inline-block;width:44px;height:24px}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--bg3);border-radius:12px;transition:.3s;border:1px solid var(--border2)}
+.slider:before{content:"";position:absolute;height:18px;width:18px;left:2px;bottom:2px;background:var(--text3);border-radius:50%;transition:.3s}
+input:checked+.slider{background:rgba(34,211,238,.3);border-color:var(--cyan)}
+input:checked+.slider:before{transform:translateX(20px);background:var(--cyan)}
+.save-toast{display:none;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:var(--green2);color:var(--green);border:1px solid rgba(74,222,128,.2);font-size:13px;font-weight:500}
+.save-toast.show{display:inline-flex}
+.test-result{padding:10px 14px;border-radius:8px;font-size:13px;margin-top:10px}
+.test-ok{background:var(--green2);color:var(--green);border:1px solid rgba(74,222,128,.2)}
+.test-fail{background:var(--red2);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+
+/* MISC */
+.warn-box{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;margin-bottom:14px}
+.warn-icon{font-size:18px;flex-shrink:0}
+.warn-text{font-size:13px;color:#fde68a;line-height:1.5}
+.info-box{background:var(--green2);border:1px solid rgba(74,222,128,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--green);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-label{font-size:12px;color:var(--text2);margin-bottom:8px;margin-top:14px}
+.custom-subs-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:10px;background:rgba(37,99,235,.06);border-radius:8px;border:1px solid rgba(37,99,235,.15);margin-top:8px;min-height:36px}
+.custom-sub-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;background:rgba(37,99,235,.15);color:var(--blue);border:1px solid rgba(37,99,235,.3)}
+.custom-sub-tag button{background:none;border:none;color:inherit;cursor:pointer;font-size:13px;line-height:1;opacity:.7;padding:0}
+.custom-sub-tag button:hover{opacity:1;color:var(--red)}
+.pain-points{list-style:none;margin-top:8px}
+.pain-points li{display:flex;align-items:flex-start;gap:7px;font-size:13px;color:var(--text1);padding:4px 0;direction:ltr}
+.pain-points li::before{content:"▸";color:var(--cyan);flex-shrink:0}
+.copy-btn-group{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.loading-dots::after{content:'.';animation:dots 1.2s infinite step-start}
+@keyframes dots{0%{content:'.'}33%{content:'..'}66%{content:'...'}}
+.spin{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .actions-grid{grid-template-columns:1fr}
+  .two-col,.ai-grid{grid-template-columns:1fr}
+  .sidebar{width:64px}
+  .sidebar .logo-text,.sidebar .nav-label,.sidebar .nav-badge,.sidebar .sov-box,.sidebar .api-pill,.sidebar .collapse-btn span{display:none}
+  .main{margin-right:64px}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+    </div>
+    <div class="logo-text">
+      <div class="logo-title">قناص الفرص</div>
+      <div class="logo-sub">OPPORTUNITY SNIPER</div>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-item active" onclick="nav('dashboard',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="nav-label">لوحة التحكم</span>
+    </div>
+    <div class="nav-item" onclick="nav('scanner',this)">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span class="nav-label">الماسح الشبح</span>
+    </div>
+    <div class="nav-item" onclick="nav('leads',this)">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span class="nav-label">الصيدات</span>
+      <span class="nav-badge" id="nav-count"></span>
+    </div>
+    <div class="nav-item" onclick="nav('ailab',this)">
+      <svg viewBox="0 0 24 24"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-5 0v-15A2.5 2.5 0 0 1 9.5 2z"/><path d="M14.5 8A2.5 2.5 0 0 1 17 10.5v9a2.5 2.5 0 0 1-5 0v-9A2.5 2.5 0 0 1 14.5 8z"/></svg>
+      <span class="nav-label">مختبر الذكاء</span>
+    </div>
+    <div class="nav-item" onclick="nav('settings',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+      <span class="nav-label">الإعدادات</span>
+    </div>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="api-pill" id="api-pill">⚠️ API غير مُعيَّن</div>
+    <div class="sov-box">
+      <div class="sov-title">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        سيادة رقمية
+      </div>
+      <div class="sov-sub">بياناتك محلية 100% • تكلفة 0$</div>
+      <div class="sov-ready">⚡ النظام جاهز</div>
+    </div>
+    <button class="collapse-btn" onclick="toggleSidebar()">
+      <svg id="collapse-icon" viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2"><polyline points="15 18 9 12 15 6"/></svg>
+      <span>طي القائمة</span>
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main">
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-header">
+    <div class="page-title">🎯 لوحة التحكم</div>
+    <div class="page-sub">نظرة شاملة على عمليات القنص</div>
+  </div>
+  <div class="stats-grid" id="dash-stats"></div>
+  <div class="actions-grid">
+    <button class="action-btn blue" onclick="nav('scanner',document.querySelector('.nav-item:nth-child(2)'))">
+      <div class="btn-icon">🕵️</div><div class="btn-title">بدء قنص جديد</div><div class="btn-sub">ابحث في Reddit عن فرص حقيقية</div>
+    </button>
+    <button class="action-btn green" onclick="nav('leads',document.querySelector('.nav-item:nth-child(3)'))">
+      <div class="btn-icon">📋</div><div class="btn-title">إدارة الصيدات</div><div class="btn-sub">راجع وصدّر النتائج</div>
+    </button>
+    <button class="action-btn purple" onclick="nav('ailab',document.querySelector('.nav-item:nth-child(4)'))">
+      <div class="btn-icon">🧠</div><div class="btn-title">مختبر الذكاء</div><div class="btn-sub">حلل المنشورات بالـ AI</div>
+    </button>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">🔥 أعلى نية دفع</div>
+        <button class="card-link" onclick="nav('leads',document.querySelector('.nav-item:nth-child(3)'))">عرض الكل ←</button>
+      </div>
+      <div id="dash-top-leads"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">📊 توزيع المجتمعات</div></div>
+      <div style="padding:14px" id="dash-distribution"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCANNER -->
+<div class="page" id="page-scanner">
+  <div class="page-header">
+    <div class="page-title">🕵️ المحرك الشبح <span style="font-size:12px;background:rgba(74,222,128,.15);color:var(--green);padding:2px 8px;border-radius:20px;vertical-align:middle">Real API</span></div>
+    <div class="page-sub">اتبع الخطوات بالترتيب للحصول على أفضل النتائج</div>
+  </div>
+
+  <!-- STEP 1: API KEY -->
+  <div class="card" style="padding:16px;margin-bottom:12px;border-color:rgba(34,211,238,.2)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--cyan2);color:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;border:1px solid var(--cyan3)">1</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text1)">🔑 مفتاح API</div>
+      <div id="step1-status" style="margin-right:auto;font-size:11px"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <select id="scan-api-provider" onchange="updateScanApiStatus()" style="width:auto;flex-shrink:0">
+        <option value="groq">Groq</option>
+        <option value="gemini">Gemini</option>
+        <option value="openrouter">OpenRouter</option>
+      </select>
+      <input type="password" id="scan-api-key-input" placeholder="gsk_... أو AIzaSy... أو sk-or-..." dir="ltr" style="flex:1" oninput="updateScanApiStatus()" />
+      <button class="btn btn-ghost" onclick="useSavedKey()" title="استخدم المحفوظ">💾</button>
+    </div>
+    <div class="field-hint" style="margin-top:6px">أو <button onclick="useSavedKey()" style="background:none;border:none;color:var(--blue);font-size:11px;cursor:pointer;padding:0">اضغط هنا لاستخدام المفتاح المحفوظ من الإعدادات →</button></div>
+  </div>
+
+  <!-- STEP 2: PRODUCT DESCRIPTION -->
+  <div class="card" style="padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--purple2);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;border:1px solid rgba(167,139,250,.3)">2</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text1)">📦 وصف منتجك</div>
+    </div>
+    <textarea id="scan-product-desc" rows="2" placeholder="مثال: أداة self-hosted لإدارة المهام تعمل محلياً بدون رسوم شهرية..." dir="ltr" oninput="saveSetting('productDescription',this.value)"></textarea>
+    <div class="field-hint">سيستخدمه الذكاء الاصطناعي لتخصيص الردود</div>
+  </div>
+
+  <!-- STEP 3: KEYWORDS + SUBREDDITS -->
+  <div class="card" style="padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="width:26px;height:26px;border-radius:50%;background:rgba(251,191,36,.15);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;border:1px solid rgba(251,191,36,.3)">3</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text1)">🔍 كلمات البحث + المواقع</div>
+    </div>
+    <label class="field-label">🔑 كلمة البحث</label>
+    <input type="text" id="scan-keyword" placeholder='مثال: "alternative to Notion" أو "tired of paying"' dir="ltr" style="margin-bottom:14px" />
+    <label class="field-label">📍 المواقع (<span id="subs-count">0</span> مُختار)</label>
+    <div id="subs-grid"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input type="text" id="custom-sub-input" placeholder="أضف موقع يدوياً مثال: webdev" dir="ltr" style="flex:1" />
+      <button class="btn btn-ghost" onclick="addCustomSub()">+ إضافة</button>
+    </div>
+    <div class="custom-subs-wrap" id="selected-subs"></div>
+  </div>
+
+  <!-- STEP 4: NUMBER OF POSTS -->
+  <div class="card" style="padding:16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <div style="width:26px;height:26px;border-radius:50%;background:rgba(96,165,250,.15);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;border:1px solid rgba(96,165,250,.3)">4</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text1)">📊 عدد المنشورات</div>
+    </div>
+    <div class="range-row">
+      <input type="range" min="5" max="100" step="5" value="25" id="scan-post-count" oninput="updatePostCount(this.value)" />
+      <div class="range-val" id="post-count-val" style="color:var(--blue)">25</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px">
+      <span>5 منشور (سريع)</span>
+      <span>50 متوسط</span>
+      <span>100 شامل</span>
+    </div>
+  </div>
+
+  <!-- STEP 5: TIMING (auto calculated) -->
+  <div class="card" style="padding:16px;margin-bottom:12px;background:rgba(0,0,0,.2)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="width:26px;height:26px;border-radius:50%;background:rgba(74,222,128,.15);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;border:1px solid rgba(74,222,128,.3)">5</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text1)">⏱️ التوقيت الذكي (تلقائي)</div>
+    </div>
+    <div id="timing-info" style="font-size:12px;color:var(--text2);line-height:1.8;padding:10px 12px;background:var(--bg3);border-radius:8px">
+      <div>⏳ الوقت التقريبي: <strong style="color:var(--green)" id="timing-est">~2 دقيقة</strong></div>
+      <div>⏸️ تأخير بين الطلبات: <strong style="color:var(--cyan)" id="timing-delay">1.5 - 3.5 ثانية</strong></div>
+      <div>🛡️ الهدف: <strong style="color:var(--amber)" id="timing-reason">تفادي الحظر من Reddit</strong></div>
+    </div>
+  </div>
+
+  <!-- STEP 6: START -->
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button class="btn btn-primary" id="scan-btn" onclick="startScan()" style="flex:1;padding:14px;font-size:15px;font-weight:700">🚀 ابدأ القنص</button>
+    <button class="btn btn-danger" id="stop-btn" onclick="stopScan()" style="display:none;flex:1;padding:14px">⛔ إيقاف</button>
+    <button class="btn btn-ghost" onclick="clearScan()" style="padding:14px">🗑️</button>
+  </div>
+
+  <!-- LOG -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-header">
+      <div class="card-title">📋 سجل العمليات <span id="scan-live-dot" style="display:none"><span class="pulse" style="display:inline-block;width:8px;height:8px;background:var(--green);border-radius:50%;margin-right:4px"></span><span style="font-size:11px;color:var(--green)">جارٍ المسح</span></span></div>
+      <span style="font-size:11px;color:var(--text3)" id="log-count">0 سجل</span>
+    </div>
+    <div class="log-box" id="scan-log">سجل العمليات سيظهر هنا...</div>
+  </div>
+  <div id="scan-results"></div>
+</div>
+
+<!-- LEADS -->
+<div class="page" id="page-leads">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div>
+        <div class="page-title">📋 إدارة الصيدات</div>
+        <div class="page-sub" id="leads-count-sub">0 صيدة في قاعدة البيانات</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="exportLeads()" style="font-size:12px">📤 تصدير CSV</button>
+        <button class="btn btn-ghost" onclick="clearAllLeads()" style="font-size:12px;color:var(--red)">🗑️ حذف الكل</button>
+      </div>
+    </div>
+  </div>
+  <div class="filter-tabs" id="leads-filters"></div>
+  <div class="search-input-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" id="leads-search" placeholder="بحث في العناوين والمحتوى..." oninput="renderLeads()" />
+  </div>
+  <div class="leads-full" id="leads-list"></div>
+</div>
+
+<!-- AI LAB -->
+<div class="page" id="page-ailab">
+  <div class="page-header">
+    <div class="page-title">🧠 مختبر الذكاء الاصطناعي</div>
+    <div class="page-sub">تحليل المنشورات وكتابة ردود بشرية مخصصة</div>
+  </div>
+  <div id="ai-no-key" class="warn-box" style="display:none">
+    <div class="warn-icon">⚠️</div>
+    <div class="warn-text">مطلوب مفتاح OpenRouter API<br><span style="opacity:.7;font-size:12px">أضفه في الإعدادات. احصل عليه مجاناً من <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--blue)">openrouter.ai/keys</a></span></div>
+  </div>
+  <div id="ai-model-info" class="info-box" style="display:none">
+    🟢 API متصل — الموديل: <strong id="ai-model-name"></strong> <span id="ai-model-free" style="margin-right:4px"></span>
+    <span style="margin-right:auto;font-size:11px;color:var(--green);opacity:.7">🔄 Auto-routing مفعّل</span>
+  </div>
+  <div id="ai-lead-card" style="display:none;margin-bottom:14px"></div>
+  <div class="ai-grid">
+    <div>
+      <label class="field-label">عنوان المنشور</label>
+      <input type="text" id="ai-title" placeholder="العنوان..." dir="ltr" style="margin-bottom:10px" />
+      <label class="field-label">محتوى المنشور</label>
+      <textarea id="ai-content" rows="5" placeholder="المحتوى..." dir="ltr"></textarea>
+      <label class="field-label" style="margin-top:10px">وصف منتجك (اختياري)</label>
+      <input type="text" id="ai-product" placeholder="مثال: أداة self-hosted لإدارة المهام..." dir="ltr" style="margin-bottom:12px" />
+      <button class="btn btn-primary btn-full" id="ai-analyze-btn" onclick="analyzePost()">🚀 تحليل بالذكاء الاصطناعي</button>
+    </div>
+    <div>
+      <label class="field-label">سجل التوجيه</label>
+      <div class="routing-log" id="ai-routing-log">سيظهر هنا سجل الموديلات...</div>
+    </div>
+  </div>
+  <div id="ai-results" style="margin-top:16px;display:none"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="page-title">⚙️ الإعدادات</div>
+        <div class="page-sub">إعداد API والموديلات والتفضيلات</div>
+      </div>
+      <div class="save-toast" id="save-toast">✅ تم الحفظ</div>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="section-title">🌐 اللغة والمظهر</div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <div>
+        <div class="field-label">اللغة</div>
+        <div class="lang-btns">
+          <button class="lang-btn on" data-lang="ar" onclick="setLang('ar',this)">🇸🇦 العربية</button>
+          <button class="lang-btn" data-lang="en" onclick="setLang('en',this)">🇬🇧 English</button>
+          <button class="lang-btn" data-lang="fr" onclick="setLang('fr',this)">🇫🇷 Français</button>
+        </div>
+      </div>
+      <div>
+        <div class="field-label">المظهر</div>
+        <div class="theme-btns">
+          <button class="theme-btn on" data-theme="dark" onclick="setTheme('dark',this)">🌙 داكن</button>
+          <button class="theme-btn" data-theme="light" onclick="setTheme('light',this)">☀️ فاتح</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="section-title">🧠 OpenRouter API <a href="https://openrouter.ai/keys" target="_blank" style="font-size:12px;color:var(--blue)">احصل على مفتاح مجاني ↗</a></div>
+    <label class="field-label">مفتاح API</label>
+    <div class="input-row">
+      <input type="password" id="set-api-key" placeholder="sk-or-v1-..." dir="ltr" oninput="saveSetting('openRouterApiKey',this.value)" />
+      <button class="btn btn-ghost" onclick="toggleShowKey()" id="show-key-btn" title="إظهار/إخفاء">👁️</button>
+      <button class="btn btn-primary" id="test-api-btn" onclick="testApiKey()">🧪 اختبار</button>
+    </div>
+    <div class="field-hint">يُحفظ محلياً في المتصفح فقط. لا يُرسل لأي خادم.</div>
+    <div id="test-result" style="display:none"></div>
+    <div style="margin-top:14px">
+      <label class="field-label">الموديل المفضّل</label>
+      <select id="set-model" onchange="saveSetting('selectedModel',this.value)"></select>
+      <div class="field-hint">🔄 الموديلات المجانية مقسّمة لمجموعات من 3 (حد OpenRouter) — fallback تلقائي بين المجموعات</div>
+    </div>
+  </div>
+  <div class="settings-section" style="border-color:rgba(34,197,94,.25)">
+    <div class="section-title">🟢 Google Gemini API <span style="font-size:11px;background:rgba(74,222,128,.15);color:var(--green);padding:2px 8px;border-radius:20px">مجاني تماماً — بديل OpenRouter</span> <a href="https://aistudio.google.com/apikey" target="_blank" style="font-size:12px;color:var(--blue)">احصل على مفتاح ↗</a></div>
+    <div class="field-hint" style="margin-bottom:10px;color:var(--green)">✓ لا يحتاج رصيد — ✓ حد 1500 طلب يومياً مجاناً — ✓ يعمل من كل الدول</div>
+    <label class="field-label">مفتاح Gemini API</label>
+    <div class="input-row">
+      <input type="password" id="set-gemini-key" placeholder="AIzaSy..." dir="ltr" oninput="saveSetting('geminiApiKey',this.value)" />
+      <button class="btn btn-ghost" onclick="document.getElementById('set-gemini-key').type=document.getElementById('set-gemini-key').type==='password'?'text':'password'">👁️</button>
+      <button class="btn" style="background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)" onclick="testGeminiKey()">🧪 اختبار</button>
+    </div>
+    <div class="field-hint">من <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--blue)">aistudio.google.com/apikey</a> — مجاني بدون بطاقة ائتمان</div>
+    <div id="gemini-test-result" style="display:none;margin-top:8px"></div>
+  </div>
+  <div class="settings-section" style="border-color:rgba(251,146,60,.25)">
+    <div class="section-title">🟠 Groq API <span style="font-size:11px;background:rgba(251,146,60,.15);color:#fb923c;padding:2px 8px;border-radius:20px">سريع جداً — 14,400 طلب/يوم</span> <a href="https://console.groq.com/keys" target="_blank" style="font-size:12px;color:var(--blue)">احصل على مفتاح ↗</a></div>
+    <div class="field-hint" style="margin-bottom:10px;color:#fb923c">✓ مجاني 100% — ✓ 14,400 طلب/يوم — ✓ أسرع من Gemini — ✓ Llama 3 + Mixtral</div>
+    <label class="field-label">مفتاح Groq API</label>
+    <div class="input-row">
+      <input type="password" id="set-groq-key" placeholder="gsk_..." dir="ltr" oninput="saveSetting('groqApiKey',this.value)" />
+      <button class="btn btn-ghost" onclick="document.getElementById('set-groq-key').type=document.getElementById('set-groq-key').type==='password'?'text':'password'">👁️</button>
+      <button class="btn" style="background:rgba(251,146,60,.15);color:#fb923c;border:1px solid rgba(251,146,60,.3)" onclick="testGroqKey()">🧪 اختبار</button>
+    </div>
+    <div class="field-hint">من <a href="https://console.groq.com/keys" target="_blank" style="color:var(--blue)">console.groq.com/keys</a> — مجاني بدون بطاقة ائتمان</div>
+    <div id="groq-test-result" style="display:none;margin-top:8px"></div>
+  </div>
+  <div class="settings-section">
+    <div class="section-title">📝 وصف منتجك</div>
+    <div class="field-hint" style="margin-bottom:8px">سيُدرج في prompt الذكاء الاصطناعي لتخصيص الردود</div>
+    <textarea id="set-product" rows="3" placeholder="مثال: أداة self-hosted لإدارة المهام والمستندات..." dir="ltr" oninput="saveSetting('productDescription',this.value)"></textarea>
+  </div>
+  <div class="settings-section">
+    <div class="section-title">🌐 CORS Proxy (اختياري)</div>
+    <div class="field-hint" style="margin-bottom:8px">إذا واجهت مشاكل في الاتصال بـ Reddit، أضف بروكسي CORS مخصص</div>
+    <input type="url" id="set-cors" placeholder="https://your-cors-proxy.com/?url=" dir="ltr" oninput="saveSetting('corsProxy',this.value)" />
+    <div class="field-hint">اتركه فارغاً لاستخدام البروكسيات العامة التلقائية</div>
+  </div>
+  <div class="settings-section">
+    <div class="section-title">⚙️ إعدادات المسح</div>
+    <label class="field-label">الحد الأقصى للتعليقات</label>
+    <div class="range-row">
+      <input type="range" min="1" max="50" id="set-max-comments" oninput="document.getElementById('range-val').textContent='≤ '+this.value;saveSetting('maxComments',parseInt(this.value))" />
+      <div class="range-val" id="range-val">≤ 5</div>
+    </div>
+    <div class="field-hint">المنشورات ذات تعليقات أقل = منافسة أقل</div>
+  </div>
+  <div class="settings-section">
+    <div class="section-title">📱 Telegram (اختياري)</div>
+    <div class="toggle-row">
+      <span style="font-size:13px;color:var(--text2)">تفعيل إشعارات Telegram</span>
+      <label class="toggle"><input type="checkbox" id="set-telegram-enabled" onchange="saveSetting('telegramEnabled',this.checked);toggleTelegramFields()"><span class="slider"></span></label>
+    </div>
+    <div id="telegram-fields" style="display:none">
+      <label class="field-label">Bot Token</label>
+      <input type="password" id="set-tg-token" placeholder="123456:ABC-DEF..." dir="ltr" style="margin-bottom:8px" oninput="saveSetting('telegramBotToken',this.value)" />
+      <label class="field-label">Chat ID</label>
+      <input type="text" id="set-tg-chat" placeholder="123456789" dir="ltr" oninput="saveSetting('telegramChatId',this.value)" />
+    </div>
+  </div>
+  <div class="settings-section" style="background:rgba(74,222,128,.05);border-color:rgba(74,222,128,.2)">
+    <div class="section-title" style="color:var(--green)">🔒 الخصوصية والأمان</div>
+    <ul class="privacy-list">
+      <li>كل بياناتك تُحفظ محلياً في متصفحك فقط</li>
+      <li>مفاتيح API لا تغادر جهازك</li>
+      <li>الطلبات تذهب مباشرة لـ OpenRouter وReddit</li>
+      <li>لا يوجد خادم وسيط أو تتبع</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const DEFAULT_SETTINGS = {
+  openRouterApiKey:'',geminiApiKey:'',groqApiKey:'',selectedModel:'deepseek/deepseek-chat-v3-0324:free',
+  maxComments:5,corsProxy:'',productDescription:'',
+  language:'ar',theme:'dark',
+  telegramEnabled:false,telegramBotToken:'',telegramChatId:''
+};
+
+let settings = {...DEFAULT_SETTINGS};
+let leads = [];
+let scanAbort = null;
+let currentFilter = 'all';
+let selectedSubs = ['SaaS','Entrepreneur'];
+
+// ═══════════════════════════════════════════
+// FREE MODELS (groups of 3 for OpenRouter limit)
+// ═══════════════════════════════════════════
+const FREE_MODELS = [
+  {id:'deepseek/deepseek-chat-v3-0324:free',name:'DeepSeek V3 Chat'},
+  {id:'meta-llama/llama-4-maverick:free',name:'Llama 4 Maverick'},
+  {id:'meta-llama/llama-4-scout:free',name:'Llama 4 Scout'},
+  {id:'google/gemma-3-27b-it:free',name:'Gemma 3 27B'},
+  {id:'google/gemma-3-12b-it:free',name:'Gemma 3 12B'},
+  {id:'google/gemma-3-4b-it:free',name:'Gemma 3 4B'},
+  {id:'qwen/qwen3-8b:free',name:'Qwen 3 8B'},
+  {id:'qwen/qwen3-14b:free',name:'Qwen 3 14B'},
+  {id:'qwen/qwen3-30b-a3b:free',name:'Qwen 3 30B'},
+  {id:'meta-llama/llama-3.3-70b-instruct:free',name:'Llama 3.3 70B'},
+  {id:'meta-llama/llama-3.1-8b-instruct:free',name:'Llama 3.1 8B'},
+  {id:'mistralai/mistral-7b-instruct:free',name:'Mistral 7B'},
+];
+const PAID_MODELS = [
+  {id:'google/gemini-2.5-flash-preview-05-20',name:'Gemini 2.5 Flash'},
+  {id:'anthropic/claude-sonnet-4',name:'Claude Sonnet 4'},
+  {id:'openai/gpt-4o',name:'GPT-4o'},
+  {id:'deepseek/deepseek-chat',name:'DeepSeek Chat'},
+];
+const ALL_MODELS = [...FREE_MODELS,...PAID_MODELS];
+
+// ═══════════════════════════════════════════
+// SUBREDDIT DATA
+// ═══════════════════════════════════════════
+const SUB_CATS = [
+  {name:'💰 Finance (Highest Pay Intent)',color:'#10B981',subs:['Finance','Investing','PersonalFinance']},
+  {name:'🛒 E-Commerce',color:'#F59E0B',subs:['Shopify','ecommerce','dropshipping']},
+  {name:'🚀 SaaS & Business',color:'#3B82F6',subs:['SaaS','Entrepreneur','nocode','smallbusiness','startups']},
+  {name:'🧠 Specialized',color:'#8B5CF6',subs:['ADHD','productivity','selfimprovement']},
+  {name:'💻 Developers',color:'#EF4444',subs:['webdev','programming','opensource','selfhosted']},
+];
+
+const SUB_COLORS = {};
+SUB_CATS.forEach(cat=>cat.subs.forEach(s=>SUB_COLORS[s.toLowerCase()]=cat.color));
+
+function subColor(s){return SUB_COLORS[s.toLowerCase()]||'#6B7280'}
+
+// ═══════════════════════════════════════════
+// PAY INTENT KEYWORDS
+// ═══════════════════════════════════════════
+const PAY_KEYWORDS = [
+  'tired of paying','alternative to','looking for','need a',
+  'too expensive','overpriced','subscription','monthly fee',
+  'self-hosted','local-first','privacy','open source',
+  'free alternative','cheaper','budget','cost',
+  'fed up','frustrated','hate','switching from',
+  'replacing','migration','cancel','vendor lock',
+  'killing my margins','fees are','better than','instead of',
+  'recommend','suggest','anyone know','what do you use',
+];
+
+function calcScore(title,content){
+  const text=(title+' '+content).toLowerCase();
+  let s=0;
+  PAY_KEYWORDS.forEach(k=>{if(text.includes(k))s+=1.5});
+  const prices=text.match(/\$\d+/g);if(prices)s+=prices.length*1.5;
+  ['hate','terrible','worst','awful','ridiculous','insane','nightmare','killing','brutal','frustrated','fed up','sick of','done with','scam','overpriced','rip off','waste','garbage','useless','broken'].forEach(w=>{if(text.includes(w))s+=1});
+  ['alternative','looking for','need','anyone know','recommend','suggestion','switch','migrate','replace','instead of','better than','compared to'].forEach(w=>{if(text.includes(w))s+=1});
+  s+=Math.min((text.match(/\?/g)||[]).length*.5,2);
+  return Math.min(Math.round(s),10);
+}
+
+// ═══════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════
+function saveAll(){
+  try{localStorage.setItem('op_sniper_settings',JSON.stringify(settings));}catch(e){}
+  try{localStorage.setItem('op_sniper_leads',JSON.stringify(leads));}catch(e){}
+}
+function loadAll(){
+  try{const s=localStorage.getItem('op_sniper_settings');if(s)settings={...DEFAULT_SETTINGS,...JSON.parse(s)};}catch(e){}
+  try{const l=localStorage.getItem('op_sniper_leads');if(l)leads=JSON.parse(l);}catch(e){}
+}
+
+function saveSetting(key,val){
+  settings[key]=val;
+  saveAll();
+  updateApiStatus();
+  document.getElementById('max-comments-display').textContent=settings.maxComments;
+}
+
+// ═══════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════
+function nav(page,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(el)el.classList.add('active');
+  if(page==='dashboard')renderDashboard();
+  if(page==='leads')renderLeads();
+  if(page==='ailab')renderAiLab();
+}
+
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const mn=document.getElementById('main');
+  const ic=document.getElementById('collapse-icon');
+  sb.classList.toggle('collapsed');
+  mn.classList.toggle('collapsed');
+  if(sb.classList.contains('collapsed'))ic.innerHTML='<polyline points="9 18 15 12 9 6"/>';
+  else ic.innerHTML='<polyline points="15 18 9 12 15 6"/>';
+}
+
+function updateApiStatus(){
+  const pill=document.getElementById('api-pill');
+  if(settings.openRouterApiKey){
+    pill.className='api-pill ok';
+    pill.textContent='🟢 API متصل';
+  }else{
+    pill.className='api-pill bad';
+    pill.textContent='⚠️ API غير مُعيَّن';
+  }
+  // also update nav badge
+  const nb=document.getElementById('nav-count');
+  nb.textContent=leads.length||'';
+  nb.style.display=leads.length?'inline':'none';
+}
+
+function scoreClass(n){return n>=7?'score-high':n>=4?'score-mid':'score-low'}
+
+function subTagHtml(sub){
+  const c=subColor(sub);
+  return `<span class="sub-tag" style="background:${c}20;color:${c}">r/${sub}</span>`;
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard(){
+  const total=leads.length;
+  const high=leads.filter(l=>l.paySignalScore>=7).length;
+  const pending=leads.filter(l=>l.status==='pending').length;
+  const avg=total?(leads.reduce((s,l)=>s+l.paySignalScore,0)/total).toFixed(1):'0';
+
+  document.getElementById('dash-stats').innerHTML=
+    [['🎯','إجمالي الصيدات',total],['🔥','نية دفع عالية',high],['⏳','تنتظر المراجعة',pending],['📊','متوسط مؤشر الدفع',avg]]
+    .map(([ic,lb,v])=>`<div class="stat-card"><div class="stat-icon">${ic}</div><div class="stat-val">${v}</div><div class="stat-label">${lb}</div></div>`).join('');
+
+  const top=[...leads].sort((a,b)=>b.paySignalScore-a.paySignalScore).slice(0,5);
+  document.getElementById('dash-top-leads').innerHTML=top.length?
+    top.map(l=>`<div class="lead-item" onclick="openInAiLab('${l.id}')">
+      <div class="score-badge ${scoreClass(l.paySignalScore)}">${l.paySignalScore}</div>
+      <div style="min-width:0;flex:1">
+        <div class="lead-title">${escHtml(l.title)}</div>
+        <div class="lead-meta">${subTagHtml(l.subreddit)}<span style="font-size:10px;color:var(--text3)">${l.commentCount} تعليق</span></div>
+      </div>
+    </div>`).join(''):
+    `<div style="padding:30px;text-align:center;color:var(--text3)"><div style="font-size:28px">🎯</div><div style="font-size:13px;margin-top:6px">لا توجد صيدات بعد. ابدأ القنص!</div></div>`;
+
+  const subCounts={};leads.forEach(l=>{subCounts[l.subreddit]=(subCounts[l.subreddit]||0)+1;});
+  const topSubs=Object.entries(subCounts).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const distEl=document.getElementById('dash-distribution');
+  if(!topSubs.length){distEl.innerHTML='<div style="padding:20px;text-align:center;color:var(--text3)"><div style="font-size:28px">📊</div><div style="font-size:13px;margin-top:6px">ابدأ القنص لرؤية التوزيع</div></div>';return;}
+  distEl.innerHTML=topSubs.map(([sub,cnt])=>{
+    const pct=Math.round(cnt/total*100);
+    return `<div class="bar-row"><div class="bar-label"><span>r/${sub}</span><span>${cnt} (${pct}%)</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${subColor(sub)}"></div></div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// SCANNER
+// ═══════════════════════════════════════════
+let scanMode='search';
+
+function updatePostCount(val){
+  document.getElementById('post-count-val').textContent=val;
+  const subs=selectedSubs.length||1;
+  const total=parseInt(val)*subs;
+  const delayAvg=2.5;
+  const mins=Math.round(total*delayAvg/60);
+  const minsText=mins<1?'< 1 دقيقة':mins+' دقيقة';
+  const el=document.getElementById('timing-est');
+  const elDelay=document.getElementById('timing-delay');
+  if(el)el.textContent='~'+minsText;
+  if(elDelay){
+    if(total<=20)elDelay.textContent='1 - 2 ثانية (خفيف)';
+    else if(total<=50)elDelay.textContent='1.5 - 3.5 ثانية (عادي)';
+    else elDelay.textContent='2 - 5 ثوان (حذري)';
+  }
+}
+
+function useSavedKey(){
+  const provider=document.getElementById('scan-api-provider')?.value||'groq';
+  let key='';
+  if(provider==='groq')key=settings.groqApiKey||'';
+  else if(provider==='gemini')key=settings.geminiApiKey||'';
+  else key=settings.openRouterApiKey||'';
+  const inp=document.getElementById('scan-api-key-input');
+  if(inp){inp.value=key;updateScanApiStatus();}
+  if(!key)alert('لا يوجد مفتاح محفوظ لهذا المزود — أدخله في الإعدادات أولاً');
+}
+
+function updateScanApiStatus(){
+  const key=document.getElementById('scan-api-key-input')?.value||'';
+  const el=document.getElementById('step1-status');
+  if(!el)return;
+  if(key.length>10){el.textContent='✅ جاهز';el.style.color='var(--green)';}
+  else{el.textContent='⚠️ مطلوب';el.style.color='var(--amber)';}
+}
+
+function getScanApiKey(){
+  const fromInput=document.getElementById('scan-api-key-input')?.value||'';
+  if(fromInput.length>10)return fromInput;
+  // fallback to saved keys
+  return settings.groqApiKey||settings.geminiApiKey||settings.openRouterApiKey||'';
+}
+
+function getScanProvider(){
+  const fromInput=document.getElementById('scan-api-key-input')?.value||'';
+  if(fromInput.length>10)return document.getElementById('scan-api-provider')?.value||'groq';
+  if(settings.groqApiKey)return 'groq';
+  if(settings.geminiApiKey)return 'gemini';
+  return 'openrouter';
+}
+
+function getPostCount(){
+  return parseInt(document.getElementById('scan-post-count')?.value||'25');
+}
+
+function renderSubsGrid(){
+  const grid=document.getElementById('subs-grid');
+  grid.innerHTML=SUB_CATS.map(cat=>`
+    <div class="cat-label" style="color:${cat.color}">${cat.name}</div>
+    <div class="subs-wrap">${cat.subs.map(s=>`<div class="sub-chip${selectedSubs.includes(s)?' on':''}" onclick="toggleSub('${s}',this)">${s}</div>`).join('')}</div>
+  `).join('');
+  renderSelectedSubs();
+}
+
+function toggleSub(sub,el){
+  if(selectedSubs.includes(sub))selectedSubs=selectedSubs.filter(s=>s!==sub);
+  else selectedSubs.push(sub);
+  if(el)el.classList.toggle('on');
+  renderSelectedSubs();
+}
+
+function renderSelectedSubs(){
+  document.getElementById('subs-count').textContent=selectedSubs.length;
+  document.getElementById('selected-subs').innerHTML=selectedSubs.map(s=>`
+    <span class="custom-sub-tag">r/${s}<button onclick="removeSub('${s}')">✕</button></span>
+  `).join('');
+}
+
+function removeSub(sub){
+  selectedSubs=selectedSubs.filter(s=>s!==sub);
+  document.querySelectorAll('.sub-chip').forEach(c=>{
+    if(c.textContent===sub)c.classList.remove('on');
+  });
+  renderSelectedSubs();
+}
+
+function addCustomSub(){
+  const inp=document.getElementById('custom-sub-input');
+  const val=inp.value.trim().replace(/^r\//,'');
+  if(val&&!selectedSubs.includes(val)){selectedSubs.push(val);renderSelectedSubs();}
+  inp.value='';
+}
+
+function setScanMode(mode,el){
+  scanMode=mode;
+  document.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('scan-url-section').style.display=mode==='url'?'block':'none';
+  document.getElementById('scan-keyword-section').style.display=mode==='search'?'block':'none';
+  document.getElementById('scan-subs-section').style.display=mode==='url'?'none':'block';
+}
+
+function addLog(msg,type){
+  const log=document.getElementById('scan-log');
+  const d=document.createElement('div');
+  d.className='log-line'+(type==='success'?' ok':type==='error'?' err':type==='warning'?' warn':type==='scan'?' scan':'');
+  const ts=new Date().toLocaleTimeString();
+  d.textContent=`[${ts}] ${msg}`;
+  if(log.querySelector('.placeholder'))log.innerHTML='';
+  log.appendChild(d);
+  log.scrollTop=log.scrollHeight;
+  const cnt=log.querySelectorAll('.log-line').length;
+  document.getElementById('log-count').textContent=cnt+' سجل';
+}
+
+function clearScan(){
+  document.getElementById('scan-log').innerHTML='سجل العمليات سيظهر هنا...';
+  document.getElementById('scan-results').innerHTML='';
+  document.getElementById('log-count').textContent='0 سجل';
+}
+
+// ─── REDDIT API ───
+const CORS_PROXIES=['https://api.allorigins.win/raw?url=','https://corsproxy.io/?url='];
+
+async function fetchReddit(url,signal){
+  const proxies=settings.corsProxy?[settings.corsProxy+'{{ENCODE}}',...CORS_PROXIES]:CORS_PROXIES;
+  // try direct first
+  try{
+    const r=await fetch(url,{signal,headers:{Accept:'application/json'}});
+    if(r.ok){addLog('✅ اتصال مباشر ناجح','success');return await r.json();}
+  }catch(e){addLog('⚠️ فشل الاتصال المباشر (CORS)','warning');}
+  // try proxies
+  for(let i=0;i<proxies.length;i++){
+    const p=proxies[i];
+    try{
+      const pu=p.includes('{{ENCODE}}')?p.replace('{{ENCODE}}',encodeURIComponent(url)):p+encodeURIComponent(url);
+      addLog(`🔄 بروكسي ${i+1}/${proxies.length}...`,'info');
+      const r=await fetch(pu,{signal});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      let text=await r.text();
+      let data;try{data=JSON.parse(text);if(data.contents)data=JSON.parse(data.contents);}catch{data=JSON.parse(text);}
+      addLog(`✅ بروكسي ${i+1} ناجح`,'success');
+      return data;
+    }catch(e){if(signal&&signal.aborted)throw e;addLog(`⚠️ بروكسي ${i+1} فشل: ${e.message}`,'warning');}
+  }
+  throw new Error('فشلت جميع محاولات الاتصال بـ Reddit. جرب إضافة CORS Proxy في الإعدادات.');
+}
+
+function postToLead(post,kw){
+  return{
+    id:post.id+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,5),
+    postId:post.id,title:post.title,
+    contentPreview:(post.selftext||'(رابط خارجي)').substring(0,500),
+    selftext:post.selftext||'',author:post.author,subreddit:post.subreddit,
+    commentCount:post.num_comments,url:'https://www.reddit.com'+post.permalink,
+    paySignalScore:calcScore(post.title,post.selftext||''),
+    aiDraftResponse:'',status:'pending',
+    createdAt:new Date(post.created_utc*1000).toISOString(),
+    keyword:kw,score:post.score
+  };
+}
+
+async function startScan(){
+  // validate
+  if(!document.getElementById('scan-keyword').value.trim()&&!selectedSubs.length){addLog('❌ أدخل كلمة بحث واختر موقعاً واحداً على الأقل','error');return;}
+  if(!document.getElementById('scan-keyword').value.trim()){addLog('❌ أدخل كلمة البحث أولاً','error');return;}
+  if(!selectedSubs.length){addLog('❌ اختر موقعاً واحداً على الأقل','error');return;}
+  const scanApiKey=getScanApiKey();
+  if(!scanApiKey){addLog('❌ أدخل مفتاح API في الخطوة 1','error');return;}
+  // save product desc if entered in scanner
+  const scanProd=document.getElementById('scan-product-desc')?.value||'';
+  if(scanProd)settings.productDescription=scanProd;
+
+  scanAbort=new AbortController();
+  document.getElementById('scan-btn').style.display='none';
+  document.getElementById('stop-btn').style.display='flex';
+  document.getElementById('scan-live-dot').style.display='inline-flex';
+  document.getElementById('scan-results').innerHTML='';
+
+  try{
+    let newLeads=[];
+    if(scanMode==='url'){
+      const url=document.getElementById('scan-url').value.trim();
+      addLog(`🎯 تحليل الرابط: ${url}`,'info');
+      let cleanUrl=url.split('?')[0].replace(/\/$/,'');
+      if(!cleanUrl.endsWith('.json'))cleanUrl+='.json';
+      cleanUrl=cleanUrl.replace('old.reddit.com','www.reddit.com').replace('new.reddit.com','www.reddit.com');
+      const data=await fetchReddit(cleanUrl,scanAbort.signal);
+      if(Array.isArray(data)&&data[0]?.data?.children?.[0]){
+        const lead=postToLead(data[0].data.children[0].data,'direct-url');
+        if(data[1]?.data?.children){
+          const coms=data[1].data.children.filter(c=>c.kind==='t1'&&c.data?.body).slice(0,10).map(c=>`💬 u/${c.data.author}: ${c.data.body.substring(0,200)}`);
+          if(coms.length)lead.selftext+='\n\n--- التعليقات ---\n'+coms.join('\n');
+        }
+        addLog(`✅ تم التحليل | مؤشر الدفع: ${lead.paySignalScore}/10`,'success');
+        newLeads=[lead];
+      }
+    }else{
+      const kw=scanMode==='search'?document.getElementById('scan-keyword').value.trim():'';
+      addLog(`🚀 بدء القنص في ${selectedSubs.length} مجتمع`+(kw?` | الكلمة: "${kw}"`:''),'info');
+      for(let i=0;i<selectedSubs.length;i++){
+        if(scanAbort.signal.aborted)break;
+        const sub=selectedSubs[i];
+        addLog(`📡 [${i+1}/${selectedSubs.length}] فحص r/${sub}...`,'scan');
+        const postLimit=getPostCount();
+          const url=`https://www.reddit.com/r/${sub}/search.json?q=${encodeURIComponent(kw)}&sort=new&restrict_sr=1&limit=${postLimit}&t=month`;
+        try{
+          const data=await fetchReddit(url,scanAbort.signal);
+          const posts=(data?.data?.children||[]).filter(c=>c.kind==='t3').map(c=>c.data);
+          const filtered=posts.filter(p=>p.num_comments<=settings.maxComments&&(scanMode==='search'||p.selftext.length>50));
+          addLog(`📊 r/${sub}: ${posts.length} → ${filtered.length} بعد تصفية التعليقات`,(filtered.length>0?'success':'warning'));
+          const ls=filtered.map(p=>postToLead(p,kw));
+          const hi=ls.filter(l=>l.paySignalScore>=7);
+          if(hi.length)addLog(`🔥 ${hi.length} صيدة عالية القيمة في r/${sub}!`,'success');
+          newLeads.push(...ls);
+        }catch(e){if(scanAbort.signal.aborted)break;addLog(`❌ خطأ في r/${sub}: ${e.message}`,'error');}
+        if(i<selectedSubs.length-1&&!scanAbort.signal.aborted){
+          const d=1500+Math.random()*2000;
+          addLog(`⏳ انتظار ${(d/1000).toFixed(1)}ث...`,'info');
+          await new Promise(r=>setTimeout(r,d));
+        }
+      }
+      newLeads.sort((a,b)=>b.paySignalScore-a.paySignalScore);
+    }
+
+    if(newLeads.length){
+      // deduplicate
+      const existing=new Set(leads.map(l=>l.postId));
+      const unique=newLeads.filter(l=>!existing.has(l.postId));
+      leads=[...unique,...leads];
+      saveAll();
+      addLog(`🏆 ${newLeads.length} صيدة (${unique.length} جديدة تم حفظها)`,'success');
+      renderScanResults(newLeads);
+      updateApiStatus();
+    }else{
+      addLog('⚠️ لم يتم العثور على صيدات مطابقة','warning');
+    }
+  }catch(e){
+    if(!scanAbort?.signal?.aborted)addLog(`❌ ${e.message}`,'error');
+    else addLog('⛔ تم الإيقاف بواسطة المستخدم','warning');
+  }finally{
+    document.getElementById('scan-btn').style.display='flex';
+    document.getElementById('stop-btn').style.display='none';
+    document.getElementById('scan-live-dot').style.display='none';
+    scanAbort=null;
+  }
+}
+
+function stopScan(){if(scanAbort)scanAbort.abort();}
+
+function renderScanResults(ls){
+  const el=document.getElementById('scan-results');
+  el.innerHTML=`<div style="font-size:14px;font-weight:600;color:var(--text1);margin-bottom:10px">🎯 نتائج القنص — <span style="background:rgba(74,222,128,.15);color:var(--green);padding:2px 10px;border-radius:20px;font-size:12px">${ls.length} صيدة</span></div>`+
+  ls.map(l=>`
+    <div class="result-card">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="flex:1;min-width:0">
+          <div class="lead-meta" style="margin-bottom:7px">${subTagHtml(l.subreddit)}<span style="font-size:11px;color:var(--text3)">u/${l.author} • ${l.commentCount} تعليق • ⬆ ${l.score}</span></div>
+          <div style="font-size:13px;color:var(--text1);margin-bottom:6px;direction:ltr">${escHtml(l.title)}</div>
+          <div style="font-size:12px;color:var(--text2);direction:ltr;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escHtml(l.contentPreview||'(لا يوجد نص)')}</div>
+        </div>
+        <div style="text-align:center;flex-shrink:0">
+          <div class="score-badge ${scoreClass(l.paySignalScore)}" style="width:42px;height:42px">${l.paySignalScore}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:3px">نية الدفع</div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <a href="${l.url}" target="_blank" class="btn btn-ghost" style="font-size:12px">🔗 فتح في Reddit</a>
+        <button class="btn btn-ai" style="font-size:12px" onclick="openInAiLab('${l.id}')">🧠 تحليل بالـ AI</button>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="copyText('${l.id}-copy','${escAttr(l.title+'\\n\\n'+l.contentPreview+'\\n\\n'+l.url)}',this)">📋 نسخ</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+// LEADS PAGE
+// ═══════════════════════════════════════════
+const FILTERS=[
+  {id:'all',label:'الكل'},
+  {id:'pending',label:'⏳ معلق'},
+  {id:'replied',label:'✅ تم الرد'},
+  {id:'ignored',label:'🚫 مُتجاهل'},
+  {id:'starred',label:'⭐ مميز'},
+];
+
+function renderFilters(){
+  const counts={all:leads.length};
+  FILTERS.slice(1).forEach(f=>{counts[f.id]=leads.filter(l=>l.status===f.id).length;});
+  document.getElementById('leads-filters').innerHTML=FILTERS.map(f=>
+    `<div class="filter-tab${currentFilter===f.id?' active':''}" onclick="setFilter('${f.id}',this)">${f.label} (${counts[f.id]||0})</div>`
+  ).join('');
+}
+
+function setFilter(id,el){
+  currentFilter=id;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  if(el)el.classList.add('active');
+  renderLeads();
+}
+
+function renderLeads(){
+  document.getElementById('leads-count-sub').textContent=`${leads.length} صيدة في قاعدة البيانات`;
+  renderFilters();
+  const q=(document.getElementById('leads-search')?.value||'').toLowerCase();
+  let filtered=leads;
+  if(currentFilter!=='all')filtered=filtered.filter(l=>l.status===currentFilter);
+  if(q)filtered=filtered.filter(l=>l.title.toLowerCase().includes(q)||(l.contentPreview||'').toLowerCase().includes(q));
+  const el=document.getElementById('leads-list');
+  if(!filtered.length){
+    el.innerHTML=`<div class="empty-state"><div class="es-icon">📭</div><div class="es-text">${leads.length?'لا توجد نتائج مطابقة':'لا توجد صيدات بعد. ابدأ القنص!'}</div></div>`;
+    return;
+  }
+  el.innerHTML=filtered.map(l=>`
+    <div class="lead-row">
+      <div class="score-badge ${scoreClass(l.paySignalScore)}">${l.paySignalScore}</div>
+      <div style="flex:1;min-width:0">
+        <div class="lead-title">${escHtml(l.title)}</div>
+        <div class="lead-meta">${subTagHtml(l.subreddit)}<span class="status-${l.status}">${statusLabel(l.status)}</span><span style="font-size:10px;color:var(--text3)">${new Date(l.createdAt).toLocaleDateString('ar')}</span></div>
+      </div>
+      <div class="lead-row-actions">
+        <select class="btn btn-ghost" style="padding:4px 8px;font-size:11px;width:auto" onchange="updateLeadStatus('${l.id}',this.value)">
+          <option value="pending"${l.status==='pending'?' selected':''}>⏳ معلق</option>
+          <option value="replied"${l.status==='replied'?' selected':''}>✅ تم الرد</option>
+          <option value="ignored"${l.status==='ignored'?' selected':''}>🚫 مُتجاهل</option>
+          <option value="starred"${l.status==='starred'?' selected':''}>⭐ مميز</option>
+        </select>
+        <button class="btn btn-ai" style="font-size:11px" onclick="openInAiLab('${l.id}')">🧠</button>
+        <a href="${l.url}" target="_blank" class="btn btn-ghost" style="font-size:11px">↗</a>
+        <button class="btn btn-ghost" style="font-size:11px;color:var(--red)" onclick="deleteLead('${l.id}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function statusLabel(s){return{pending:'⏳ معلق',replied:'✅ تم الرد',ignored:'🚫 مُتجاهل',starred:'⭐ مميز'}[s]||s}
+
+function updateLeadStatus(id,status){
+  const l=leads.find(x=>x.id===id);if(l){l.status=status;saveAll();renderLeads();}
+}
+
+function deleteLead(id){
+  if(confirm('حذف هذه الصيدة؟')){leads=leads.filter(l=>l.id!==id);saveAll();renderLeads();updateApiStatus();}
+}
+
+function clearAllLeads(){
+  if(confirm('هل أنت متأكد من حذف جميع الصيدات؟')){leads=[];saveAll();renderLeads();updateApiStatus();}
+}
+
+function exportLeads(){
+  const rows=[['العنوان','المجتمع','المؤلف','مؤشر الدفع','الحالة','التعليقات','الرابط','التاريخ']];
+  leads.forEach(l=>rows.push([l.title,l.subreddit,l.author,l.paySignalScore,l.status,l.commentCount,l.url,new Date(l.createdAt).toLocaleDateString('ar')]));
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='opportunity-sniper-leads.csv';a.click();
+}
+
+// ═══════════════════════════════════════════
+// AI LAB
+// ═══════════════════════════════════════════
+let currentAiLead=null;
+
+function openInAiLab(id){
+  const l=leads.find(x=>x.id===id);
+  if(l){
+    currentAiLead=l;
+    document.getElementById('ai-title').value=l.title;
+    document.getElementById('ai-content').value=l.selftext||l.contentPreview||'';
+    nav('ailab',document.querySelector('.nav-item:nth-child(4)'));
+  }
+}
+
+function renderAiLab(){
+  const noKey=document.getElementById('ai-no-key');
+  const modelInfo=document.getElementById('ai-model-info');
+  const leadCard=document.getElementById('ai-lead-card');
+  if(!settings.openRouterApiKey){noKey.style.display='flex';modelInfo.style.display='none';}
+  else{noKey.style.display='none';modelInfo.style.display='flex';
+    const m=settings.selectedModel.split('/').pop().replace(':free','');
+    document.getElementById('ai-model-name').textContent=m;
+    document.getElementById('ai-model-free').textContent=settings.selectedModel.includes(':free')?'(مجاني)':'';
+  }
+  if(currentAiLead){
+    const c=subColor(currentAiLead.subreddit);
+    leadCard.style.display='block';
+    leadCard.innerHTML=`<div class="card" style="padding:12px 14px">
+      <div class="lead-meta" style="margin-bottom:6px">${subTagHtml(currentAiLead.subreddit)}<span style="font-size:11px;color:var(--text2)">u/${currentAiLead.author} • ${currentAiLead.commentCount} تعليق</span><a href="${currentAiLead.url}" target="_blank" style="margin-right:auto;font-size:12px;color:var(--blue)">🔗 فتح</a></div>
+      <div style="font-size:13px;color:var(--text1);direction:ltr">${escHtml(currentAiLead.title)}</div>
+    </div>`;
+  }else{leadCard.style.display='none';}
+  // pre-fill product desc
+  if(settings.productDescription)document.getElementById('ai-product').value=settings.productDescription;
+}
+
+// ─── OpenRouter with chunk fallback ───
+const MAX_MODELS_PER_REQ=3;
+
+function chunkArray(arr,size){
+  const chunks=[];for(let i=0;i<arr.length;i+=size)chunks.push(arr.slice(i,i+size));return chunks;
+}
+
+async function callOpenRouter(apiKey,models,messages,maxTokens=1500){
+  const body={models,route:'fallback',messages,temperature:.7,max_tokens:maxTokens,provider:{allow_fallbacks:true,sort:'price',require_parameters:false}};
+  const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+    method:'POST',headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json','HTTP-Referer':location.origin,'X-Title':'Opportunity Sniper'},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){
+    const e=await res.json().catch(()=>({}));
+    const msg=e?.error?.message||'HTTP '+res.status;
+    const code=res.status;
+    // Attach status code to error for diagnosis
+    const err=new Error(msg);
+    err.statusCode=code;
+    err.rawError=e?.error;
+    throw err;
+  }
+  const data=await res.json();
+  if(!data.choices?.length)throw new Error('Empty response');
+  return data;
+}
+
+async function callWithChunks(apiKey,preferredModel,allModels,messages,maxTokens,logCb){
+  const ordered=[preferredModel,...allModels.filter(m=>m!==preferredModel)];
+  const chunks=chunkArray(ordered,MAX_MODELS_PER_REQ);
+  logCb(`🔄 ${allModels.length} موديل ÷ 3 = ${chunks.length} مجموعة (حد OpenRouter)`,false);
+  for(let i=0;i<chunks.length;i++){
+    const chunk=chunks[i];
+    logCb(`📋 المجموعة ${i+1}: ${chunk.map(m=>m.split('/').pop().replace(':free','')).join(', ')}`,false);
+    try{
+      logCb(`📡 إرسال الطلب...`,true);
+      const data=await callOpenRouter(apiKey,chunk,messages,maxTokens);
+      const used=data.model||chunk[0];
+      logCb(`✅ استجاب: ${used.split('/').pop().replace(':free','')}`,true);
+      return data;
+    }catch(e){logCb(`⚠️ المجموعة ${i+1} فشلت: ${e.message}`,false);}
+  }
+  throw new Error('فشلت جميع المجموعات');
+}
+
+async function analyzePost(){
+  const title=document.getElementById('ai-title').value.trim();
+  const content=document.getElementById('ai-content').value.trim();
+  const product=document.getElementById('ai-product').value.trim()||settings.productDescription;
+  if(!title&&!content){alert('أدخل عنوان أو محتوى المنشور');return;}
+  if(!settings.groqApiKey&&!settings.geminiApiKey&&!settings.openRouterApiKey){alert('أدخل مفتاح Groq أو Gemini أو OpenRouter في الإعدادات');return;}
+
+  const btn=document.getElementById('ai-analyze-btn');
+  btn.disabled=true;btn.textContent='⏳ جارٍ التحليل...';
+  document.getElementById('ai-results').style.display='none';
+  document.getElementById('ai-routing-log').innerHTML='';
+
+  const logs=document.getElementById('ai-routing-log');
+  function logLine(msg,cyan){
+    const d=document.createElement('div');d.style.color=cyan?'var(--cyan)':'var(--text2)';d.textContent=msg;logs.appendChild(d);logs.scrollTop=logs.scrollHeight;
+  }
+
+  const systemPrompt=`أنت "وكيل مبيعات سيادي" متخصص في تحليل منشورات Reddit.${product?'\n\n**المنتج المراد تسويقه:** '+product:''}
+
+شكل المخرجات المطلوبة (استخدم هذه العناوين بالضبط):
+
+**تحليل الألم:** (جملة واحدة)
+
+**الرد المقترح:** (رد بشري جاهز للإرسال على Reddit)
+
+**مؤشر القنص:** (رقم 1-10)
+
+**نقاط الألم المستخرجة:**
+- نقطة 1
+- نقطة 2
+- نقطة 3`;
+
+  const messages=[
+    {role:'system',content:systemPrompt},
+    {role:'user',content:`حلل هذا المنشور واكتب رداً سيادياً:\n\n**العنوان:** ${title}\n\n**المحتوى:**\n${content}\n\nاتبع شكل المخرجات المطلوبة بالضبط. اكتب الرد بلغة المنشور.`}
+  ];
+
+  try{
+    let raw='';
+    let modelUsed='';
+
+    // Priority: Groq → Gemini → OpenRouter
+    if(settings.groqApiKey&&!raw){
+      logLine('🟠 محاولة Groq API...',true);
+      try{
+        const res=await callGroq(settings.groqApiKey,systemPrompt,messages[1].content,1500);
+        raw=res.text;modelUsed=res.model;
+        logLine(`✅ Groq استجاب! الموديل: ${res.model}`,true);
+      }catch(groqErr){
+        logLine(`⚠️ Groq فشل: ${groqErr.message}`,false);
+        if(!settings.geminiApiKey&&!settings.openRouterApiKey)throw groqErr;
+        logLine('🔄 جارٍ التحويل...',true);
+      }
+    }
+
+    if(settings.geminiApiKey&&!raw){
+      logLine('🟢 محاولة Gemini API...',true);
+      try{
+        raw=await callGemini(settings.geminiApiKey,systemPrompt,messages[1].content,1500);
+        modelUsed='gemini-2.0-flash';
+        logLine('✅ Gemini استجاب بنجاح!',true);
+      }catch(geminiErr){
+        logLine(`⚠️ Gemini فشل: ${geminiErr.message}`,false);
+        if(!settings.openRouterApiKey)throw geminiErr;
+        logLine('🔄 التحويل إلى OpenRouter...',true);
+      }
+    }
+
+    // Fallback to OpenRouter
+    if(!raw&&settings.openRouterApiKey){
+      const isFree=settings.selectedModel.includes(':free');
+      const freeIds=FREE_MODELS.map(m=>m.id);
+      let orData;
+      if(isFree){
+        orData=await callWithChunks(settings.openRouterApiKey,settings.selectedModel,freeIds,messages,1500,logLine);
+      }else{
+        logLine('💎 موديل مدفوع — طلب مباشر',true);
+        orData=await callOpenRouter(settings.openRouterApiKey,[settings.selectedModel],messages,1500);
+      }
+      raw=orData.choices[0]?.message?.content||'';
+      modelUsed=orData.model||settings.selectedModel;
+    }
+
+    logLine(`📝 اكتمل — الموديل: ${modelUsed.split('/').pop().replace(':free','')}`,true);
+    displayAiResults(raw,modelUsed,title,content);
+    if(currentAiLead){
+      const parsed=parseAi(raw);
+      const l=leads.find(x=>x.id===currentAiLead.id);
+      if(l){l.aiDraftResponse=parsed.reply;if(parsed.score)l.paySignalScore=parsed.score;saveAll();}
+    }
+  }catch(e){
+    logLine('❌ خطأ: '+e.message,false);
+    document.getElementById('ai-results').style.display='block';
+    document.getElementById('ai-results').innerHTML=`<div style="background:var(--red2);border:1px solid rgba(248,113,113,.25);border-radius:10px;padding:14px;color:var(--red)">${escHtml(e.message)}</div>`;
+  }finally{btn.disabled=false;btn.textContent='🚀 تحليل بالذكاء الاصطناعي';}
+}
+
+function parseAi(raw){
+  const clean=raw.replace(/<think>[\s\S]*?<\/think>/gi,'').replace(/<reasoning>[\s\S]*?<\/reasoning>/gi,'').trim();
+  const t=clean||raw;
+  const pain=(t.match(/(?:تحليل الألم|Pain Analysis)[:\s]*(.+?)(?:\n\n|\*\*|##)/is)||[])[1]?.trim().replace(/^\*+|\*+$/g,'');
+  const reply=(t.match(/(?:الرد المقترح|Suggested Reply|Draft Reply)[:\s]*([\s\S]+?)(?:\n\n\*\*|مؤشر القنص|Snipe Score|نقاط الألم|Pain Points|$)/i)||[])[1]?.trim().replace(/^\*+|\*+$/g,'');
+  const scoreM=t.match(/(?:مؤشر القنص|Snipe Score|Score)[:\s]*(\d+)/i);
+  const score=scoreM?Math.min(10,Math.max(1,parseInt(scoreM[1]))):null;
+  const ptsM=t.match(/(?:نقاط الألم|Pain Points)[:\s]*([\s\S]+?)(?:\n\n|$)/i);
+  const pts=ptsM?( ptsM[1].match(/[-•*]\s*(.+)/g)||[]).map(p=>p.replace(/^[-•*]\s*/,'')):[];
+  return{pain:pain||'',reply:reply||t,score,pts,raw};
+}
+
+function displayAiResults(raw,model,title,content){
+  const p=parseAi(raw);
+  const sc=p.score||calcScore(title,content);
+  const el=document.getElementById('ai-results');
+  el.style.display='block';
+  el.innerHTML=`
+    ${p.pain?`<div class="ai-result-box"><div class="ai-result-label">🔍 تحليل الألم</div><div class="ai-result-text">${escHtml(p.pain)}</div></div>`:''}
+    <div class="score-row">
+      <div class="score-circle ${scoreClass(sc)}" style="background:${sc>=7?'rgba(74,222,128,.15)':sc>=4?'rgba(251,191,36,.15)':'rgba(100,116,139,.15)'};color:${sc>=7?'var(--green)':sc>=4?'var(--amber)':'var(--text2)'};border:2px solid ${sc>=7?'rgba(74,222,128,.3)':sc>=4?'rgba(251,191,36,.3)':'rgba(100,116,139,.3)'}">
+        ${sc}
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text1)">مؤشر القنص: ${sc>=7?'عالي جداً':sc>=4?'متوسط':'منخفض'}</div>
+        <div style="font-size:11px;color:var(--text3)">${model.split('/').pop().replace(':free','')}</div>
+      </div>
+    </div>
+    ${p.pts.length?`<div class="ai-result-box"><div class="ai-result-label">🎯 نقاط الألم المستخرجة</div><ul class="pain-points">${p.pts.map(pt=>`<li>${escHtml(pt)}</li>`).join('')}</ul></div>`:''}
+    <div class="ai-result-box">
+      <div class="ai-result-label">💬 الرد المقترح</div>
+      <div class="ai-result-text" id="ai-reply-text" style="white-space:pre-wrap">${escHtml(p.reply)}</div>
+      <div class="copy-btn-group">
+        <button class="btn btn-cyan" style="font-size:12px" onclick="copyText('ai-reply','${escAttr(p.reply)}',this)">📋 نسخ الرد</button>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="document.getElementById('ai-raw-section').style.display=document.getElementById('ai-raw-section').style.display==='none'?'block':'none'">👁️ عرض Raw</button>
+      </div>
+    </div>
+    <div id="ai-raw-section" style="display:none"><div class="ai-result-box"><div class="ai-result-label">📄 Raw Response</div><div style="font-family:monospace;font-size:11px;color:var(--text2);white-space:pre-wrap;direction:ltr;line-height:1.6">${escHtml(raw)}</div></div></div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+// SETTINGS PAGE
+// ═══════════════════════════════════════════
+function loadSettings(){
+  document.getElementById('set-api-key').value=settings.openRouterApiKey;
+  document.getElementById('set-gemini-key').value=settings.geminiApiKey||'';
+  if(document.getElementById('set-groq-key'))document.getElementById('set-groq-key').value=settings.groqApiKey||'';
+  document.getElementById('set-groq-key').value=settings.groqApiKey||'';
+  document.getElementById('set-cors').value=settings.corsProxy;
+  document.getElementById('set-product').value=settings.productDescription;
+  document.getElementById('set-max-comments').value=settings.maxComments;
+  document.getElementById('range-val').textContent='≤ '+settings.maxComments;
+  document.getElementById('max-comments-display').textContent=settings.maxComments;
+  document.getElementById('set-telegram-enabled').checked=settings.telegramEnabled;
+  document.getElementById('set-tg-token').value=settings.telegramBotToken||'';
+  document.getElementById('set-tg-chat').value=settings.telegramChatId||'';
+  toggleTelegramFields();
+  // populate model select
+  const sel=document.getElementById('set-model');
+  sel.innerHTML='<optgroup label="🆓 Free Models">'+FREE_MODELS.map(m=>`<option value="${m.id}"${m.id===settings.selectedModel?' selected':''}>${m.name}</option>`).join('')+'</optgroup>'+
+    '<optgroup label="💰 Paid Models">'+PAID_MODELS.map(m=>`<option value="${m.id}"${m.id===settings.selectedModel?' selected':''}>${m.name}</option>`).join('')+'</optgroup>';
+  // lang/theme buttons
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('on',b.dataset.lang===settings.language));
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.toggle('on',b.dataset.theme===(settings.theme||'dark')));
+}
+
+function setLang(lang,el){
+  settings.language=lang;saveAll();
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  showSaveToast();
+}
+function setTheme(theme,el){
+  settings.theme=theme;saveAll();
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  showSaveToast();
+}
+
+function showSaveToast(){
+  const t=document.getElementById('save-toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function toggleShowKey(){
+  const inp=document.getElementById('set-api-key');
+  inp.type=inp.type==='password'?'text':'password';
+}
+function toggleTelegramFields(){
+  document.getElementById('telegram-fields').style.display=document.getElementById('set-telegram-enabled').checked?'block':'none';
+}
+
+// ═══════════════════════════════════════════
+// GEMINI API (direct - no rate limit issues)
+// ═══════════════════════════════════════════
+async function callGemini(apiKey, systemPrompt, userPrompt, maxTokens=1500){
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const body={
+    contents:[{parts:[{text:userPrompt}],role:'user'}],
+    systemInstruction:{parts:[{text:systemPrompt}]},
+    generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}
+  };
+  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!res.ok){
+    const e=await res.json().catch(()=>({}));
+    const msg=e?.error?.message||'HTTP '+res.status;
+    const err=new Error(msg);err.statusCode=res.status;throw err;
+  }
+  const data=await res.json();
+  const text=data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if(!text)throw new Error('Empty response from Gemini');
+  return text;
+}
+
+async function testGeminiKey(){
+  const btn=event.target;
+  const res=document.getElementById('gemini-test-result');
+  if(!settings.geminiApiKey){res.style.display='block';res.className='test-result test-fail';res.textContent='❌ أدخل مفتاح Gemini أولاً';return;}
+  btn.disabled=true;btn.textContent='⏳ جارٍ...';res.style.display='none';
+  try{
+    const text=await callGemini(settings.geminiApiKey,'Reply with exactly one word: OK','Test',5);
+    res.style.display='block';res.className='test-result test-ok';
+    res.innerHTML='✅ Gemini متصل! جاهز للاستخدام — gemini-2.0-flash';
+    updateApiStatus();
+  }catch(e){
+    res.style.display='block';res.className='test-result test-fail';
+    const msg=e.message.toLowerCase();
+    if(e.statusCode===400||msg.includes('api key')||msg.includes('invalid')){
+      res.textContent='❌ مفتاح غير صحيح';
+    }else if(e.statusCode===429||msg.includes('quota')){
+      res.textContent='⚠️ تجاوزت الحد اليومي (1500 طلب/يوم) — جرّب غداً';
+    }else{
+      res.textContent='❌ '+e.message;
+    }
+  }
+  btn.disabled=false;btn.textContent='🧪 اختبار';
+}
+
+// ═══════════════════════════════════════════
+// GROQ API — 14,400 req/day free
+// ═══════════════════════════════════════════
+const GROQ_MODELS=['llama-3.3-70b-versatile','llama-3.1-8b-instant','mixtral-8x7b-32768','gemma2-9b-it'];
+
+async function callGroqDirect(apiKey,model,systemPrompt,userPrompt,maxTokens){
+  const body=JSON.stringify({model,messages:[{role:'system',content:systemPrompt},{role:'user',content:userPrompt}],max_tokens:maxTokens,temperature:0.7});
+  // Try direct first
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json'},
+      body
+    });
+    if(res.ok){
+      const data=await res.json();
+      const text=data?.choices?.[0]?.message?.content;
+      if(text)return text;
+    }
+    if(res.status===401){const e=await res.json().catch(()=>({}));const err=new Error(e?.error?.message||'Unauthorized');err.statusCode=401;throw err;}
+  }catch(e){
+    if(e.statusCode===401)throw e;
+    // CORS or network — try via proxy
+  }
+  // Fallback: route through corsproxy.io
+  const proxyUrl='https://corsproxy.io/?url='+encodeURIComponent('https://api.groq.com/openai/v1/chat/completions');
+  const res2=await fetch(proxyUrl,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json','x-cors-api-key':'temp_...'},
+    body
+  });
+  if(!res2.ok){
+    const e=await res2.json().catch(()=>({}));
+    const err=new Error(e?.error?.message||'HTTP '+res2.status);
+    err.statusCode=res2.status;
+    throw err;
+  }
+  const data2=await res2.json();
+  return data2?.choices?.[0]?.message?.content||'';
+}
+
+async function callGroq(apiKey,systemPrompt,userPrompt,maxTokens=1500){
+  let lastErr=null;
+  for(const model of GROQ_MODELS){
+    try{
+      const text=await callGroqDirect(apiKey,model,systemPrompt,userPrompt,maxTokens);
+      if(!text)throw new Error('Empty response');
+      return {text,model};
+    }catch(e){
+      if(e.statusCode===401)throw e;
+      lastErr=e;
+    }
+  }
+  throw lastErr||new Error('All Groq models failed');
+}
+
+async function testGroqKey(){
+  const btn=event.target;
+  const res=document.getElementById('groq-test-result');
+  if(!settings.groqApiKey){res.style.display='block';res.className='test-result test-fail';res.textContent='❌ أدخل مفتاح Groq أولاً';return;}
+  btn.disabled=true;btn.textContent='⏳ جارٍ...';res.style.display='none';
+  try{
+    const {text,model}=await callGroq(settings.groqApiKey,'Reply with one word: OK','Test',5);
+    res.style.display='block';res.className='test-result test-ok';
+    res.innerHTML=`✅ Groq متصل! <strong>${model}</strong>`;
+    updateApiStatus();showSaveToast();
+  }catch(e){
+    res.style.display='block';res.className='test-result test-fail';
+    const msg=e.message.toLowerCase();
+    if(e.statusCode===401||msg.includes('invalid')||msg.includes('api key')){res.textContent='❌ مفتاح غير صحيح';}
+    else if(e.statusCode===429||msg.includes('rate')||msg.includes('quota')){res.textContent='⚠️ تجاوزت الحد اليومي — جرّب غداً';}
+    else{res.textContent='❌ '+e.message;}
+  }
+  btn.disabled=false;btn.textContent='🧪 اختبار';
+}
+
+async function diagnosError(e){
+  const msg=(e.message||'').toLowerCase();
+  const code=e.statusCode||0;
+  if(code===401||msg.includes('401')||msg.includes('invalid api key')||msg.includes('unauthorized')){
+    return {icon:'❌',title:'مفتاح API غير صحيح',detail:'تحقق من المفتاح على openrouter.ai/keys',fix:null,fatal:true};
+  }
+  if(code===402||msg.includes('insufficient')||msg.includes('credits')||msg.includes('balance')){
+    return {icon:'💳',title:'رصيد غير كاف',detail:'تحتاج إضافة رصيد على openrouter.ai',fix:'openrouter.ai/credits',fatal:true};
+  }
+  if(code===429||msg.includes('rate limit')||msg.includes('too many')){
+    return {icon:'⚠️',title:'تجاوزت حد الطلبات',detail:'انتظر دقيقة ثم أعد المحاولة',fix:null,fatal:false};
+  }
+  if(msg.includes('no endpoints')||msg.includes('provider')||msg.includes('unavailable')){
+    return {icon:'🔴',title:'الموديل غير متاح',detail:'هذا الموديل تحديداً متوقف، جرّب موديلاً آخر',fix:null,fatal:false};
+  }
+  if(msg.includes('network')||msg.includes('fetch')||msg.includes('failed to fetch')){
+    return {icon:'📵',title:'خطأ شبكة',detail:'تحقق من اتصال الإنترنت',fix:null,fatal:false};
+  }
+  return {icon:'❓',title:'خطأ غير معروف',detail:e.message,fix:null,fatal:false};
+}
+
+function showDiag(el,diag,extra){
+  const fixHtml=diag.fix?`<a href="https://${diag.fix}" target="_blank" style="color:var(--blue);font-size:12px;display:block;margin-top:6px">فتح ${diag.fix} ↗</a>`:'';
+  el.innerHTML=`<div style="font-weight:600;font-size:14px;margin-bottom:4px">${diag.icon} ${diag.title}</div><div style="font-size:12px;opacity:.85">${diag.detail}</div>${extra?`<div style="font-size:11px;color:var(--amber);margin-top:5px;font-family:monospace">${extra}</div>`:''}${fixHtml}`;
+}
+
+async function testApiKey(){
+  const btn=document.getElementById('test-api-btn');
+  const res=document.getElementById('test-result');
+  if(!settings.openRouterApiKey){
+    res.style.display='block';res.className='test-result test-fail';
+    res.innerHTML='❌ أدخل مفتاح API أولاً';
+    return;
+  }
+  btn.disabled=true;res.style.display='none';
+
+  // Step 1: verify key with /auth/key endpoint
+  btn.textContent='⏳ تحقق من المفتاح...';
+  try{
+    const authRes=await fetch('https://openrouter.ai/api/v1/auth/key',{
+      headers:{'Authorization':'Bearer '+settings.openRouterApiKey}
+    });
+    if(authRes.status===401){
+      res.style.display='block';res.className='test-result test-fail';
+      showDiag(res,{icon:'❌',title:'مفتاح API غير صحيح',detail:'تحقق من المفتاح على openrouter.ai/keys',fix:'openrouter.ai/keys'});
+      btn.disabled=false;btn.textContent='🧪 اختبار';
+      return;
+    }
+    if(authRes.ok){
+      const authData=await authRes.json();
+      const credits=authData?.data?.limit_remaining;
+      const usage=authData?.data?.usage;
+      if(credits!==null&&credits!==undefined&&credits<=0){
+        res.style.display='block';res.className='test-result test-fail';
+        showDiag(res,{icon:'💳',title:'رصيد غير كاف',detail:`الرصيد المتبقي: $${credits} — أضف رصيداً`,fix:'openrouter.ai/credits'});
+        btn.disabled=false;btn.textContent='🧪 اختبار';
+        return;
+      }
+    }
+  }catch(e){}
+
+  // Step 2: try model chunks
+  const messages=[{role:'system',content:'Reply with exactly one word: OK'},{role:'user',content:'Test'}];
+  const allIds=FREE_MODELS.map(m=>m.id);
+  const chunks=chunkArray(allIds,MAX_MODELS_PER_REQ);
+  let lastErr=null;
+  let providerErrors=0;
+
+  for(let i=0;i<chunks.length;i++){
+    btn.textContent=`⏳ مجموعة ${i+1}/${chunks.length}...`;
+    try{
+      const data=await callOpenRouter(settings.openRouterApiKey,chunks[i],messages,20);
+      const m=(data.model||chunks[i][0]).split('/').pop().replace(':free','');
+      res.style.display='block';res.className='test-result test-ok';
+      res.innerHTML=`<div style="font-weight:600">✅ متصل بنجاح!</div><div style="font-size:12px;margin-top:4px">الموديل: <strong>${m}</strong> — المجموعة ${i+1}</div>`;
+      updateApiStatus();showSaveToast();
+      btn.disabled=false;btn.textContent='🧪 اختبار';
+      return;
+    }catch(e){
+      lastErr=e;
+      const diag=await diagnosError(e);
+      if(diag.fatal){
+        res.style.display='block';res.className='test-result test-fail';
+        showDiag(res,diag,e.message);
+        btn.disabled=false;btn.textContent='🧪 اختبار';
+        return;
+      }
+      if(diag.title.includes('موديل')||diag.title.includes('متاح'))providerErrors++;
+    }
+  }
+
+  // All failed - show best diagnosis
+  res.style.display='block';res.className='test-result test-fail';
+  const allProvider=providerErrors>=chunks.length;
+  if(allProvider){
+    showDiag(res,{icon:'🔴',title:'جميع الموديلات المجانية متوقفة حالياً',detail:'المفتاح صحيح لكن OpenRouter مشغول. جرّب بعد دقائق أو استخدم موديلاً مدفوعاً',fix:null},lastErr?.message);
+  }else{
+    const diag=lastErr?await diagnosError(lastErr):{icon:'❓',title:'خطأ غير معروف',detail:'',fix:null};
+    showDiag(res,diag,lastErr?.message);
+  }
+  btn.disabled=false;btn.textContent='🧪 اختبار';
+}
+
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function escAttr(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n')}
+
+async function copyText(id,text,btn){
+  const decoded=text.replace(/\\n/g,'\n').replace(/\\'/g,"'");
+  try{await navigator.clipboard.writeText(decoded);if(btn){const orig=btn.textContent;btn.textContent='✅ تم النسخ!';setTimeout(()=>btn.textContent=orig,2000);}}
+  catch{window.prompt('انسخ هذا النص يدوياً (Ctrl+C):',decoded);}
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+loadAll();
+loadSettings();
+renderSubsGrid();
+renderDashboard();
+// init scanner step1 from saved keys
+setTimeout(()=>{
+  const inp=document.getElementById('scan-api-key-input');
+  const sel=document.getElementById('scan-api-provider');
+  const pd=document.getElementById('scan-product-desc');
+  if(inp&&sel){
+    if(settings.groqApiKey){sel.value='groq';inp.value=settings.groqApiKey;}
+    else if(settings.geminiApiKey){sel.value='gemini';inp.value=settings.geminiApiKey;}
+    else if(settings.openRouterApiKey){sel.value='openrouter';inp.value=settings.openRouterApiKey;}
+    updateScanApiStatus();
+  }
+  if(pd&&settings.productDescription)pd.value=settings.productDescription;
+  updatePostCount(25);
+},100);
+updateApiStatus();
+document.getElementById('max-comments-display').textContent=settings.maxComments;
+
+// Make settings changes show save toast
+const originalSaveSetting=saveSetting;
+</script>
+</body>
+</html>
